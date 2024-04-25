@@ -1,0 +1,70 @@
+version: "2"
+
+services:
+  samba:
+    image: dperson/samba:rpi
+    restart: always
+    command: '-u "pi;password" -s "media;/media;yes;no"'
+    stdin_open: true
+    tty: true
+    ports:
+      - 139:130
+      - 445:445
+    volumes:
+      - /media/M:/media
+
+  portainer:
+      image: portainer/portainer-ce:latest
+      container_name: portainer
+      restart: unless-stopped
+      security_opt:
+        - no-new-privileges:true
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - ./portainer-data:/data
+      ports:
+        - 9000:9000
+
+  homer:
+      image: b4bz/homer:latest
+      container_name: homer
+      volumes:
+        - /home/pi/homer/config:/www/assets
+      ports:
+        - 8092:8082
+      environment:
+        - UID=1000
+        - GID=1000
+      restart: unless-stopped
+
+
+#   netdata:
+#     image: netdata/netdata
+#     container_name: netdata
+#     hostname: RaspyOrz # set to fqdn of host
+#     ports:
+#       - 19999:19999
+#     restart: unless-stopped
+#     cap_add:
+#       - SYS_PTRACE
+#     security_opt:
+#       - apparmor:unconfined
+#     volumes:
+#       - netdataconfig:/etc/netdata
+#       - netdatalib:/var/lib/netdata
+#       - netdatacache:/var/cache/netdata
+#       - /etc/passwd:/host/etc/passwd:ro
+#       - /etc/group:/host/etc/group:ro
+#       - /proc:/host/proc:ro
+#       - /sys:/host/sys:ro
+#       - /etc/os-release:/host/etc/os-release:ro
+#     environment:
+#       - NETDATA_CLAIM_TOKEN=I2449KF3Ss1HlWMeKcbQT8DT6zMLrk4HJPmJPEFMfJZhOsKwCG-X44lY274GnPP7DADB2LWagKAFh-Wlr14460GowshYCXGcT_FrwgbWfg8Q5KiCHuPCeiFnCwlzElTMq-DFNig
+#       - NETDATA_CLAIM_URL=https://app.netdata.cloud
+#       - NETDATA_CLAIM_ROOMS=
+
+# volumes:
+#   netdataconfig:
+#   netdatalib:
+#   netdatacache:
